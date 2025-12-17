@@ -15,6 +15,9 @@ export function Camera() {
   const targetPosRef = useRef(new THREE.Vector3());
   const targetLookRef = useRef(new THREE.Vector3());
   
+  const cameraHeight = Math.max(mazeWidth, mazeHeight) * 0.8;
+  const cameraDistance = Math.max(mazeWidth, mazeHeight) * 0.6;
+  
   useFrame(() => {
     if (phase === "moving") {
       const ballX = ballPosition.x * CELL_SIZE + offsetX;
@@ -24,14 +27,9 @@ export function Camera() {
       targetLookRef.current.set(ballX, 0, ballZ);
       
       camera.position.lerp(targetPosRef.current, 0.05);
-      
-      const currentLook = new THREE.Vector3();
-      camera.getWorldDirection(currentLook);
-      currentLook.add(camera.position);
-      currentLook.lerp(targetLookRef.current, 0.05);
       camera.lookAt(targetLookRef.current);
     } else {
-      camera.position.set(0, 15, 12);
+      camera.position.set(0, cameraHeight, cameraDistance);
       camera.lookAt(0, 0, 0);
     }
   });

@@ -13,6 +13,7 @@ const algorithmNames: Record<Algorithm, string> = {
 export function GameOverlay() {
   const hasSolvedRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const visualizationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   const phase = useMaze(state => state.phase);
   const selectedAlgorithm = useMaze(state => state.selectedAlgorithm);
@@ -25,7 +26,13 @@ export function GameOverlay() {
   const endPos = useMaze(state => state.endPos);
   const setPath = useMaze(state => state.setPath);
   const setVisitedCells = useMaze(state => state.setVisitedCells);
+  const setStats = useMaze(state => state.setStats);
   const startMoving = useMaze(state => state.startMoving);
+  const stats = useMaze(state => state.stats);
+  const visualizationMode = useMaze(state => state.visualizationMode);
+  const visualizationIndex = useMaze(state => state.visualizationIndex);
+  const startVisualization = useMaze(state => state.startVisualization);
+  const advanceVisualization = useMaze(state => state.advanceVisualization);
   
   useEffect(() => {
     if (phase === "menu") {
@@ -33,6 +40,10 @@ export function GameOverlay() {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
+      }
+      if (visualizationIntervalRef.current) {
+        clearInterval(visualizationIntervalRef.current);
+        visualizationIntervalRef.current = null;
       }
     }
   }, [phase]);
@@ -48,15 +59,46 @@ export function GameOverlay() {
       
       console.log(`Path found: ${result.path.length} cells`);
       console.log(`Visited: ${result.visited.length} cells`);
+      console.log(`Time: ${result.stats.solveTimeMs.toFixed(2)}ms`);
       
+      setStats(result.stats);
       setVisitedCells(result.visited);
       setPath(result.path);
       
-      timeoutRef.current = setTimeout(() => {
-        startMoving();
-      }, 500);
+      if (visualizationMode === "step") {
+        timeoutRef.current = setTimeout(() => {
+          startVisualization();
+        }, 300);
+      } else {
+        timeoutRef.current = setTimeout(() => {
+          startMoving();
+        }, 500);
+      }
     }
   }, [phase, selectedAlgorithm]);
+  
+  useEffect(() => {
+    if (phase === "visualizing") {
+      visualizationIntervalRef.current = setInterval(() => {
+        const hasMore = advanceVisualization();
+        if (!hasMore) {
+          if (visualizationIntervalRef.current) {
+            clearInterval(visualizationIntervalRef.current);
+            visualizationIntervalRef.current = null;
+          }
+          timeoutRef.current = setTimeout(() => {
+            startMoving();
+          }, 500);
+        }
+      }, 30);
+      
+      return () => {
+        if (visualizationIntervalRef.current) {
+          clearInterval(visualizationIntervalRef.current);
+        }
+      };
+    }
+  }, [phase]);
   
   if (phase === "menu") return null;
   
@@ -67,24 +109,37 @@ export function GameOverlay() {
           Algorithm: {selectedAlgorithm && algorithmNames[selectedAlgorithm]}
         </div>
         <div className="text-gray-400 text-sm space-y-1">
-          <div>Cells Explored: <span className="text-red-400">{visitedCells.length}</span></div>
-          <div>Path Length: <span className="text-cyan-400">{path.length}</span></div>
+          {stats && (
+            <>
+              <div>Solve Time: <span className="text-yellow-400">{stats.solveTimeMs.toFixed(2)}ms</span></div>
+              <div>Nodes Explored: <span className="text-red-400">{stats.nodesExplored}</span></div>
+              <div>Path Length: <span className="text-cyan-400">{stats.pathLength}</span></div>
+            </>
+          )}
+          {phase === "visualizing" && (
+            <div>Visualizing: <span className="text-orange-400">{visualizationIndex} / {visitedCells.length}</span></div>
+          )}
           {phase === "moving" && (
-            <div>Progress: <span className="text-yellow-400">{pathIndex} / {path.length}</span></div>
+            <div>Progress: <span className="text-green-400">{pathIndex} / {path.length}</span></div>
           )}
         </div>
       </div>
       
       {phase === "completed" && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20">
-          <div className="bg-gray-900 p-8 rounded-2xl shadow-2xl text-center border border-gray-700">
+          <div className="bg-gray-900 p-8 rounded-2xl shadow-2xl text-center border border-gray-700 max-w-md">
             <h2 className="text-3xl font-bold text-green-400 mb-4">
               Maze Solved!
             </h2>
             <div className="text-gray-300 mb-6 space-y-2">
               <p>Algorithm: <span className="text-white font-semibold">{selectedAlgorithm && algorithmNames[selectedAlgorithm]}</span></p>
-              <p>Cells Explored: <span className="text-red-400 font-semibold">{visitedCells.length}</span></p>
-              <p>Path Length: <span className="text-cyan-400 font-semibold">{path.length}</span></p>
+              {stats && (
+                <>
+                  <p>Solve Time: <span className="text-yellow-400 font-semibold">{stats.solveTimeMs.toFixed(2)}ms</span></p>
+                  <p>Nodes Explored: <span className="text-red-400 font-semibold">{stats.nodesExplored}</span></p>
+                  <p>Path Length: <span className="text-cyan-400 font-semibold">{stats.pathLength}</span></p>
+                </>
+              )}
             </div>
             <button
               onClick={restart}

@@ -8,6 +8,7 @@ import { Camera } from "./components/game/Camera";
 import { Lights } from "./components/game/Lights";
 import { AlgorithmMenu } from "./components/ui/AlgorithmMenu";
 import { GameOverlay } from "./components/ui/GameOverlay";
+import { ComparisonMode } from "./components/ui/ComparisonMode";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
       
       <AlgorithmMenu />
       <GameOverlay />
+      <ComparisonMode />
     </div>
   );
 }

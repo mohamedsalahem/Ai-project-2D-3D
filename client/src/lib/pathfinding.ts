@@ -1,4 +1,4 @@
-import { MazeCell, Position, Algorithm } from "./stores/useMaze";
+import { MazeCell, Position, Algorithm, AlgorithmStats } from "./stores/useMaze";
 
 interface Node {
   pos: Position;
@@ -8,9 +8,10 @@ interface Node {
   parent: Node | null;
 }
 
-interface SearchResult {
+export interface SearchResult {
   path: Position[];
   visited: Position[];
+  stats: AlgorithmStats;
 }
 
 function heuristic(a: Position, b: Position): number {
@@ -57,6 +58,7 @@ function posKey(pos: Position): string {
 }
 
 export function astar(maze: MazeCell[][], start: Position, end: Position): SearchResult {
+  const startTime = performance.now();
   const visited: Position[] = [];
   const openSet: Node[] = [];
   const closedSet = new Set<string>();
@@ -78,7 +80,16 @@ export function astar(maze: MazeCell[][], start: Position, end: Position): Searc
     visited.push(current.pos);
     
     if (current.pos.x === end.x && current.pos.z === end.z) {
-      return { path: reconstructPath(current), visited };
+      const path = reconstructPath(current);
+      return { 
+        path, 
+        visited,
+        stats: {
+          solveTimeMs: performance.now() - startTime,
+          nodesExplored: visited.length,
+          pathLength: path.length,
+        }
+      };
     }
     
     closedSet.add(posKey(current.pos));
@@ -102,10 +113,19 @@ export function astar(maze: MazeCell[][], start: Position, end: Position): Searc
     }
   }
   
-  return { path: [], visited };
+  return { 
+    path: [], 
+    visited,
+    stats: {
+      solveTimeMs: performance.now() - startTime,
+      nodesExplored: visited.length,
+      pathLength: 0,
+    }
+  };
 }
 
 export function bfs(maze: MazeCell[][], start: Position, end: Position): SearchResult {
+  const startTime = performance.now();
   const visited: Position[] = [];
   const queue: Node[] = [];
   const visitedSet = new Set<string>();
@@ -118,7 +138,16 @@ export function bfs(maze: MazeCell[][], start: Position, end: Position): SearchR
     visited.push(current.pos);
     
     if (current.pos.x === end.x && current.pos.z === end.z) {
-      return { path: reconstructPath(current), visited };
+      const path = reconstructPath(current);
+      return { 
+        path, 
+        visited,
+        stats: {
+          solveTimeMs: performance.now() - startTime,
+          nodesExplored: visited.length,
+          pathLength: path.length,
+        }
+      };
     }
     
     for (const neighborPos of getNeighbors(current.pos, maze)) {
@@ -130,10 +159,19 @@ export function bfs(maze: MazeCell[][], start: Position, end: Position): SearchR
     }
   }
   
-  return { path: [], visited };
+  return { 
+    path: [], 
+    visited,
+    stats: {
+      solveTimeMs: performance.now() - startTime,
+      nodesExplored: visited.length,
+      pathLength: 0,
+    }
+  };
 }
 
 export function dfs(maze: MazeCell[][], start: Position, end: Position): SearchResult {
+  const startTime = performance.now();
   const visited: Position[] = [];
   const stack: Node[] = [];
   const visitedSet = new Set<string>();
@@ -149,7 +187,16 @@ export function dfs(maze: MazeCell[][], start: Position, end: Position): SearchR
     visited.push(current.pos);
     
     if (current.pos.x === end.x && current.pos.z === end.z) {
-      return { path: reconstructPath(current), visited };
+      const path = reconstructPath(current);
+      return { 
+        path, 
+        visited,
+        stats: {
+          solveTimeMs: performance.now() - startTime,
+          nodesExplored: visited.length,
+          pathLength: path.length,
+        }
+      };
     }
     
     for (const neighborPos of getNeighbors(current.pos, maze)) {
@@ -159,10 +206,19 @@ export function dfs(maze: MazeCell[][], start: Position, end: Position): SearchR
     }
   }
   
-  return { path: [], visited };
+  return { 
+    path: [], 
+    visited,
+    stats: {
+      solveTimeMs: performance.now() - startTime,
+      nodesExplored: visited.length,
+      pathLength: 0,
+    }
+  };
 }
 
 export function ucs(maze: MazeCell[][], start: Position, end: Position): SearchResult {
+  const startTime = performance.now();
   const visited: Position[] = [];
   const openSet: Node[] = [];
   const closedSet = new Set<string>();
@@ -179,7 +235,16 @@ export function ucs(maze: MazeCell[][], start: Position, end: Position): SearchR
     visited.push(current.pos);
     
     if (current.pos.x === end.x && current.pos.z === end.z) {
-      return { path: reconstructPath(current), visited };
+      const path = reconstructPath(current);
+      return { 
+        path, 
+        visited,
+        stats: {
+          solveTimeMs: performance.now() - startTime,
+          nodesExplored: visited.length,
+          pathLength: path.length,
+        }
+      };
     }
     
     for (const neighborPos of getNeighbors(current.pos, maze)) {
@@ -198,10 +263,19 @@ export function ucs(maze: MazeCell[][], start: Position, end: Position): SearchR
     }
   }
   
-  return { path: [], visited };
+  return { 
+    path: [], 
+    visited,
+    stats: {
+      solveTimeMs: performance.now() - startTime,
+      nodesExplored: visited.length,
+      pathLength: 0,
+    }
+  };
 }
 
 export function ids(maze: MazeCell[][], start: Position, end: Position): SearchResult {
+  const startTime = performance.now();
   const allVisited: Position[] = [];
   
   function dls(node: Node, depth: number, visitedSet: Set<string>): Node | null {
@@ -238,11 +312,28 @@ export function ids(maze: MazeCell[][], start: Position, end: Position): SearchR
     const startNode: Node = { pos: start, g: 0, h: 0, f: 0, parent: null };
     const result = dls(startNode, depth, new Set());
     if (result) {
-      return { path: reconstructPath(result), visited: allVisited };
+      const path = reconstructPath(result);
+      return { 
+        path, 
+        visited: allVisited,
+        stats: {
+          solveTimeMs: performance.now() - startTime,
+          nodesExplored: allVisited.length,
+          pathLength: path.length,
+        }
+      };
     }
   }
   
-  return { path: [], visited: allVisited };
+  return { 
+    path: [], 
+    visited: allVisited,
+    stats: {
+      solveTimeMs: performance.now() - startTime,
+      nodesExplored: allVisited.length,
+      pathLength: 0,
+    }
+  };
 }
 
 export function runAlgorithm(algo: Algorithm, maze: MazeCell[][], start: Position, end: Position): SearchResult {
