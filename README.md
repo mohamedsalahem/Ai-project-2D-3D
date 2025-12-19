@@ -26,7 +26,7 @@ Each algorithm returns the path (if found) and visualizes the agent’s movement
 - `1` → Wall (blocked)
 
 The maze is represented as a 2D grid:
-```python
+python
 maze = [
     [0, 0, 0, 0, 1],
     [1, 1, 0, 0, 1],
@@ -34,6 +34,7 @@ maze = [
     [0, 1, 0, 0, 0],
     [0, 0, 0, 1, 0]
 ]
+
 
 # 🧠 3D AI Search Algorithms Simulation
 
