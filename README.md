@@ -1,3 +1,11 @@
+## 👥 Team Contributions
+
+- Mohamed Salah: A*
+- Habiba Tamer: BFS  
+- Shahenda Farag: DFS  
+- Eman Ali: UCS  
+- Esraa Yehia: IDS  
+
 # 🧩 Maze Pathfinding Visualization (2D)
 
 ## 📌 Project Overview
