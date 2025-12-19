@@ -29,10 +29,15 @@ The maze is represented as a 2D grid:
 python
 maze = [
     [0, 0, 0, 0, 1],
+    
     [1, 1, 0, 0, 1],
+    
     [0, 0, 0, 1, 0],
+    
     [0, 1, 0, 0, 0],
+    
     [0, 0, 0, 1, 0]
+    
 ]
 
 
